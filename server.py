@@ -32,7 +32,8 @@ class MyWebServer(SocketServer.BaseRequestHandler):
     def handle(self):
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
-        self.request.sendall("OK")
+        message = 'HTTP/1.1 404 Not Found\r\n\r\n<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">\r\n<html>\r\n<head>\r\n<title>404 Not Found</title>\r\n</head>\r\n<body>\r\n<h1>Not Found</h1>\r\n<p>The requested URL /t.html was not found on this server.</p>\r\n</body>\r\n</html>\r\n\r\n'
+        self.request.sendall(message)
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
@@ -44,3 +45,5 @@ if __name__ == "__main__":
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
     server.serve_forever()
+
+
