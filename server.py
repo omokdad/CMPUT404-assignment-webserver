@@ -1,5 +1,5 @@
 #  coding: utf-8 
-import SocketServer
+import SocketServer, mimetypes, os
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
@@ -26,14 +26,73 @@ import SocketServer
 
 # try: curl -v -X GET http://127.0.0.1:8080/
 
-
 class MyWebServer(SocketServer.BaseRequestHandler):
     
+    def getMethod(self):
+        return self.data[0]
+    
+    def getFilePath(self):
+        self.filePath = os.path.join(os.getcwd(), "www" + self.data[1])
+        if os.path.exists(self.filePath):
+            return True
+        else:
+            return False
+    
+    
+    def isdirectory(self):
+        if os.path.isdir(self.filePath):
+            self.filePath += "index.html"
+        return
+    
+    def getFileType(self):
+        self.fileType = mimetypes.guess_type(self.filePath)[0]
+        return
+
+    def setupHeader(self):
+        self.header = "HTTP/1.1 200 OK\r\nContent-type:" + self.fileType + ";\r\n\r\n"
+        return    
+    
+    def setup404(self):
+        self.header = "HTTP/1.1 404 Not Found\r\n\r\n"
+        return
+    
+    def setup405(self):
+        self.header = "HTTP/1.1 405 Method Not Allowed\r\n\r\n"
+        return
+    
+    def readFile(self, fileName):
+        if fileName == "404":
+            file = open("www/404.html")
+        elif fileName == "405":
+            file = open("www/405.html")
+        else:
+            file = open(self.filePath)
+        
+        self.file = file.read()
+        file.close()
+        return    
+    
+    def serveFile(self):
+        self.request.sendall(self.header + self.file)
+        return
+
     def handle(self):
-        self.data = self.request.recv(1024).strip()
+        self.data = self.request.recv(1024).strip().split(" ")
         print ("Got a request of: %s\n" % self.data)
-        message = 'HTTP/1.1 404 Not Found\r\n\r\n<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">\r\n<html>\r\n<head>\r\n<title>404 Not Found</title>\r\n</head>\r\n<body>\r\n<h1>Not Found</h1>\r\n<p>The requested URL /t.html was not found on this server.</p>\r\n</body>\r\n</html>\r\n\r\n'
-        self.request.sendall(message)
+        
+        if getMethod() != "GET":
+            setup405()
+            readFile("405")
+        elif getFilePath():
+            isDirectory()
+            getFileType()
+            setupHeader()
+            readFile(self.fileName)
+        else:
+            setup404()
+            readFile("404")
+        
+        serveFile()
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
