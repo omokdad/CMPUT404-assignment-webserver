@@ -39,14 +39,14 @@ class MyWebServer(SocketServer.BaseRequestHandler):
             return False
     
     
-    def isdirectory(self):
+    def fixDirectory(self):
         if os.path.isdir(self.filePath):
             self.filePath += "index.html"
         return
     
     def getFileType(self):
         self.fileType = mimetypes.guess_type(self.filePath)[0]
-        return
+        return self.fileType
 
     def setupHeader(self):
         self.header = "HTTP/1.1 200 OK\r\nContent-type:" + self.fileType + ";\r\n\r\n"
@@ -78,16 +78,19 @@ class MyWebServer(SocketServer.BaseRequestHandler):
 
     def handle(self):
         self.data = self.request.recv(1024).strip().split(" ")
-        print ("Got a request of: %s\n" % self.data)
+        #print ("Got a request of: %s\n" % self.data)
         
         if self.getMethod() != "GET":
             self.setup405()
             self.readFile("405")
         elif self.getFilePath():
-            self.isDirectory()
-            self.getFileType()
-            self.setupHeader()
-            self.readFile(self.fileName)
+            self.fixDirectory()
+            if self.getFileType():
+                self.setupHeader()
+                self.readFile(self.filePath)
+            else:
+                self.setup404()
+                self.readFile("404")
         else:
             self.setup404()
             self.readFile("404")

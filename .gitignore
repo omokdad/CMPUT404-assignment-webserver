@@ -3,6 +3,9 @@
 # C extensions
 *.so
 
+# VS settings
+.vscode
+
 # Packages
 *.egg
 *.egg-info
@@ -17,6 +20,7 @@ develop-eggs
 .installed.cfg
 lib
 lib64
+tags
 __pycache__
 
 # Installer logs
