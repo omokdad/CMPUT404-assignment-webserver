@@ -80,19 +80,19 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         self.data = self.request.recv(1024).strip().split(" ")
         print ("Got a request of: %s\n" % self.data)
         
-        if getMethod() != "GET":
-            setup405()
-            readFile("405")
-        elif getFilePath():
-            isDirectory()
-            getFileType()
-            setupHeader()
-            readFile(self.fileName)
+        if self.getMethod() != "GET":
+            self.setup405()
+            self.readFile("405")
+        elif self.getFilePath():
+            self.isDirectory()
+            self.getFileType()
+            self.setupHeader()
+            self.readFile(self.fileName)
         else:
-            setup404()
-            readFile("404")
+            self.setup404()
+            self.readFile("404")
         
-        serveFile()
+        self.serveFile()
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
